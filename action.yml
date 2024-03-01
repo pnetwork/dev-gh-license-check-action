@@ -7,6 +7,9 @@ inputs:
   approved-dependencies:
     description: 'A comma separated list of dependencies that are approved'
     required: false
+  pip-requirements-path:
+    description: 'The path to the requirements file'
+    required: false
   base-path:
     description: 'The base path with the code to review'
     required: true
@@ -46,15 +49,28 @@ runs:
         done        
       shell: bash
       if: ${{ inputs.approved-dependencies }}
-    - name: 'Report dependency licenses'
-      working-directory: ${{ inputs.base-path }}
+    - working-directory: ${{ inputs.base-path }}
+      run: |
+        echo "Report dependency licenses"
+        license_finder report --pip-requirements-path=${{ inputs.pip-requirements-path}}
+      shell: bash
+      if: ${{ inputs.pip-requirements-path }}
+    - working-directory: ${{ inputs.base-path }}
+      run: |
+        echo "Ensure license compliance"
+        license_finder  --pip-requirements-path=${{ inputs.pip-requirements-path}}
+      shell: bash
+      if: ${{ inputs.pip-requirements-path }}
+    - working-directory: ${{ inputs.base-path }}
       run: |
         echo "Report dependency licenses"
         license_finder report
       shell: bash
-    - name: 'Ensure license compliance'  
-      working-directory: ${{ inputs.base-path }}
+      if: ${{ !inputs.pip-requirements-path }}
+    - working-directory: ${{ inputs.base-path }}
       run: |
         echo "Ensure license compliance"
         license_finder 
       shell: bash
+      if: ${{ !inputs.pip-requirements-path }}
+

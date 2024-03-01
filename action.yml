@@ -1,0 +1,60 @@
+name: 'License Check'
+description: 'Ensure license compliance'
+inputs:
+  permitted-licenses:
+    description: 'A comma separated list of licenses that are permitted'
+    required: false
+  approved-dependencies:
+    description: 'A comma separated list of dependencies that are approved'
+    required: false
+  base-path:
+    description: 'The base path with the code to review'
+    required: true
+    default: ${{ github.workspace }} 
+runs:
+  using: "composite"
+  steps:
+    - name: Setup Ruby  # for license_finder package
+      uses: ruby/setup-ruby@v1
+      with:
+        ruby-version: '3.3' 
+
+    - name: 'Install license-finder'
+      run: |
+        echo "Installing license_finder"
+        sudo gem install license_finder
+      shell: bash
+    - name: 'Add permitted licenses'
+      run: |
+        cd ${{ inputs.base-path }}
+        echo "Configuring permitted licenses"
+        licenses="${{ inputs.permitted-licenses }}"
+        for i in ${licenses//,/ }
+        do
+            license_finder permitted_licenses add $i
+        done        
+      shell: bash
+      if: ${{ inputs.permitted-licenses }}
+    - name: 'Add dependency approvals'
+      run: |
+        cd ${{ inputs.base-path }}
+        echo "Configuring approved dependencies"
+        dependencies="${{ inputs.approved-dependencies }}"
+        for i in ${dependencies//,/ }
+        do
+            license_finder approvals add $i
+        done        
+      shell: bash
+      if: ${{ inputs.approved-dependencies }}
+    - name: 'Report dependency licenses'
+      run: |
+        cd ${{ inputs.base-path }}
+        echo "Report dependency licenses"
+        license_finder report
+      shell: bash
+    - name: 'Ensure license compliance'  
+      run: |
+        cd ${{ inputs.base-path }}
+        echo "Ensure license compliance"
+        license_finder 
+      shell: bash

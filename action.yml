@@ -25,8 +25,8 @@ runs:
         sudo gem install license_finder
       shell: bash
     - name: 'Add permitted licenses'
+      working-directory: ${{ inputs.base-path }}
       run: |
-        cd ${{ inputs.base-path }}
         echo "Configuring permitted licenses"
         licenses="${{ inputs.permitted-licenses }}"
         for i in ${licenses//,/ }
@@ -36,8 +36,8 @@ runs:
       shell: bash
       if: ${{ inputs.permitted-licenses }}
     - name: 'Add dependency approvals'
+      working-directory: ${{ inputs.base-path }}
       run: |
-        cd ${{ inputs.base-path }}
         echo "Configuring approved dependencies"
         dependencies="${{ inputs.approved-dependencies }}"
         for i in ${dependencies//,/ }
@@ -47,14 +47,14 @@ runs:
       shell: bash
       if: ${{ inputs.approved-dependencies }}
     - name: 'Report dependency licenses'
+      working-directory: ${{ inputs.base-path }}
       run: |
-        cd ${{ inputs.base-path }}
         echo "Report dependency licenses"
         license_finder report
       shell: bash
     - name: 'Ensure license compliance'  
+      working-directory: ${{ inputs.base-path }}
       run: |
-        cd ${{ inputs.base-path }}
         echo "Ensure license compliance"
         license_finder 
       shell: bash
